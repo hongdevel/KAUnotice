@@ -9,17 +9,17 @@ def target_html(url):
 
     return soup.select("#sub_article > table > tbody > tr")
 
-def detect_new_notice(notice):
+def get_last_notice_num(notice):
     important_notice = 0
 
     for i in notice:
         if i.text[1] == '\n':
             important_notice += 1
         else:
-            recent_notice_num = int(i.text[1:5])
+            notice_num = int(i.text[1:5])
             break
     
-    return [important_notice, recent_notice_num]
+    return [important_notice, notice_num]
 
 def extract_title(notice):
     titles = []
