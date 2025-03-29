@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from enum import Enum
 
-class notice_link(Enum):
+class notice_urls(Enum):
     일반 = 'https://kau.ac.kr/kaulife/notice.php'
     학사 = 'https://kau.ac.kr/kaulife/acdnoti.php'
     장학및대출 = 'https://kau.ac.kr/kaulife/scholnoti.php'
@@ -12,6 +12,7 @@ class notice_link(Enum):
     전염병관리 = 'https://kau.ac.kr/kaulife/covidnoti.php'
     IT = 'https://kau.ac.kr/kaulife/itnoti.php'
     산학및연구 = 'https://kau.ac.kr/kaulife/iunoti.php'
+    교내식단표 = 'https://kau.ac.kr/kaulife/foodmenu.php'
 
 def target_html(url):
     headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
@@ -21,8 +22,9 @@ def target_html(url):
 
     return soup.select("#sub_article > table > tbody > tr")
 
-def get_last_notice_num(notice):
+def get_new_notice_num(notice):
     important_notice = 0
+    notice_num = 0
 
     for i in notice:
         if i.text[1] == '\n':
