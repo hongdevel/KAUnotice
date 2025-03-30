@@ -2,6 +2,7 @@ import scraper as sc
 import discord
 from discord import app_commands
 from discord.ext import tasks
+from discord.ui import View, Button
 import random
 import asyncio
 import os
@@ -38,6 +39,11 @@ class MyClient(discord.Client):
     async def setup_hook(self):
         await self.tree.sync()
 
+class UrlButton(View):
+    def __init__(self, label:str, url:str):
+        super().__init__(timeout=None)
+        self.add_item(Button(label=label, url=url))
+
 client = MyClient()
 
 @tasks.loop(hours=1)
@@ -65,7 +71,7 @@ async def detect_new_notice():
             for guild in client.guilds:
                 system_channel = guild.system_channel
                 if system_channel:
-                    await system_channel.send(embed=embed)
+                    await system_channel.send(embed=embed, view=UrlButton(label=f"{page["name"]}공지 바로가기", url=page["url"]))
             embed = None
         
         delay = random.uniform(3, 7)
@@ -73,13 +79,13 @@ async def detect_new_notice():
         await asyncio.sleep(delay)
 
 @client.tree.command(name="공지확인", description="선택한 종류의 최근 공지를 확인합니다.")
-async def view_notice(interaction: discord.Interaction, sort: sc.notice_urls):
+async def view_notice(interaction: discord.Interaction, sort: sc.NoticeUrls):
     html = sc.target_html(sort.value)
     titles = sc.extract_title(html)
-    embed = discord.Embed(title=sort.name + "공지", color=0x7da7fa)
+    embed = discord.Embed(title=f"{sort.name}공지", color=0x7da7fa)
     for title in titles:
         embed.add_field(name=title, value='', inline=False)
     
-    await interaction.response.send_message(embed=embed)
+    await interaction.response.send_message(embed=embed, view=UrlButton(label=f"{sort.name}공지 바로가기", url=sort.value))
 
 client.run(DISCORD_TOKEN)

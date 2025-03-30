@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from enum import Enum
 
-class notice_urls(Enum):
+class NoticeUrls(Enum):
     일반 = 'https://kau.ac.kr/kaulife/notice.php'
     학사 = 'https://kau.ac.kr/kaulife/acdnoti.php'
     장학및대출 = 'https://kau.ac.kr/kaulife/scholnoti.php'
