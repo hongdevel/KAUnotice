@@ -25,6 +25,7 @@ def target_html(url):
 def get_new_notice_num(notice):
     important_notice = 0
     notice_num = 0
+    important_notice_date = ''
 
     for i in notice:
         if i.text[1] == '\n':
@@ -33,7 +34,13 @@ def get_new_notice_num(notice):
             notice_num = int(i.text[1:5])
             break
     
-    return [important_notice, notice_num]
+    if notice_num == 0:
+        for i in range(-1, -len(notice[0].text), -1):
+            if notice[0].text[i] == "-":
+                important_notice_date = notice[0].text[i - 7:i + 3]
+                break
+    
+    return [important_notice, notice_num, important_notice_date]
 
 def extract_title(notice):
     titles = []
