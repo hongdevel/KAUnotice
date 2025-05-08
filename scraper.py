@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 from enum import Enum
+import re
+import datetime
 
 class NoticeUrls(Enum):
     일반 = 'https://kau.ac.kr/kaulife/notice.php'
@@ -59,3 +61,15 @@ def extract_title(notice):
         titles.append("".join(string))
     
     return titles
+
+def get_lunch_menu():
+    pages = target_html('https://kau.ac.kr/kaulife/foodmenu.php')
+
+    date_re = re.compile(r"\[학생식당\] \d{1,2}년\d{1,2}월\d{1,2}일~\d{1,2}월\d{1,2}일")
+
+    for i in pages:
+        if date_re.search(i.text):
+            print(list(i.text))
+
+if __name__ == "__main__":
+    get_lunch_menu()
