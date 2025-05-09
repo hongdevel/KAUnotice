@@ -3,6 +3,9 @@ from bs4 import BeautifulSoup
 from enum import Enum
 import re
 import datetime
+import os
+from urllib.request import urlretrieve
+from urllib.parse import urljoin
 
 class NoticeUrls(Enum):
     일반 = 'https://kau.ac.kr/kaulife/notice.php'
@@ -69,6 +72,9 @@ def get_lunch_menu():
 
     date_re = re.compile(r"\[학생식당\] ((\d{1,2}년)(\d{1,2}월\d{1,2}일)~(\d{1,2}월\d{1,2}일))")
 
+    base_url = 'https://kau.ac.kr'
+    url = None
+
     for i in pages:
         date = date_re.search(i.text)
 
@@ -77,8 +83,24 @@ def get_lunch_menu():
             end_date = datetime.datetime.strptime(date.group(2)+date.group(4), "%y년%m월%d일")
 
             if start_date < now and now < end_date:
-                print(start_date < now < end_date)
-                print(start_date)
+                url = i.select_one("td.tit > a").attrs["href"]
+                url = urljoin(base_url, url)
+    
+    if url:
+        path_folder = "./foodmenu/"
+        if not os.path.isdir(path_folder):
+            os.mkdir("./foodmenu/")
+        
+        headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
+        data = requests.get(url,headers=headers)
+
+        soup = BeautifulSoup(data.text, 'html.parser')
+
+        img_url = soup.select_one("#sub_article > div.view > div.view_conts > p > img").attrs["src"]
+
+        urlretrieve(urljoin(base_url, img_url), path_folder + "foodmenu_img.png")
+
+
 
 if __name__ == "__main__":
     get_lunch_menu()
