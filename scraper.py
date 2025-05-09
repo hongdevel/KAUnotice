@@ -65,11 +65,20 @@ def extract_title(notice):
 def get_lunch_menu():
     pages = target_html('https://kau.ac.kr/kaulife/foodmenu.php')
 
-    date_re = re.compile(r"\[학생식당\] \d{1,2}년\d{1,2}월\d{1,2}일~\d{1,2}월\d{1,2}일")
+    now = datetime.datetime.now()
+
+    date_re = re.compile(r"\[학생식당\] ((\d{1,2}년)(\d{1,2}월\d{1,2}일)~(\d{1,2}월\d{1,2}일))")
 
     for i in pages:
-        if date_re.search(i.text):
-            print(list(i.text))
+        date = date_re.search(i.text)
+
+        if date:
+            start_date = datetime.datetime.strptime(date.group(2)+date.group(3), "%y년%m월%d일")
+            end_date = datetime.datetime.strptime(date.group(2)+date.group(4), "%y년%m월%d일")
+
+            if start_date < now and now < end_date:
+                print(start_date < now < end_date)
+                print(start_date)
 
 if __name__ == "__main__":
     get_lunch_menu()
