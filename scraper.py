@@ -96,7 +96,7 @@ def get_lunch_menu():
 
         soup = BeautifulSoup(data.text, 'html.parser')
 
-        img_url = soup.select_one("#sub_article > div.view > div.view_conts > p > img").attrs["src"]
+        img_url = soup.select_one("#sub_article > div.view > div.view_conts img").attrs["src"]
 
         urlretrieve(urljoin(base_url, img_url), path_folder + "foodmenu_img.png")
 
