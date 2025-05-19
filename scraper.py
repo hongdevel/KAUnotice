@@ -6,6 +6,11 @@ import datetime
 import os
 from urllib.request import urlretrieve
 from urllib.parse import urljoin
+import cv2
+from matplotlib import pyplot as plt
+import pytesseract
+
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 class NoticeUrls(Enum):
     일반 = 'https://kau.ac.kr/kaulife/notice.php'
@@ -99,6 +104,17 @@ def get_lunch_menu():
         img_url = soup.select_one("#sub_article > div.view > div.view_conts img").attrs["src"]
 
         urlretrieve(urljoin(base_url, img_url), path_folder + "foodmenu_img.png")
+
+        img = cv2.imread(path_folder + "foodmenu_img.png")
+
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        #plt.imshow(gray)
+        #plt.show()
+
+        config = ('-l kor+eng --oem 3 --psm 11')
+        output = pytesseract.image_to_string(gray, config=config)
+        print(output)
 
 
 
