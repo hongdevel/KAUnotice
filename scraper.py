@@ -9,6 +9,7 @@ from urllib.parse import urljoin
 import cv2
 from matplotlib import pyplot as plt
 import pytesseract
+import numpy as np
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
@@ -107,13 +108,25 @@ def get_lunch_menu():
 
         img = cv2.imread(path_folder + "foodmenu_img.png")
 
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        img_cut = img[47:276, 38:212]
 
-        #plt.imshow(gray)
+        img_zoom = cv2.resize(img_cut, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+
+        img_gray = cv2.cvtColor(img_zoom, cv2.COLOR_BGR2GRAY)
+
+        img_binary = cv2.adaptiveThreshold(img_gray, 127, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 9)
+
+        kernel = np.ones((3,3), np.uint8)
+
+        img_erode = cv2.erode(img_binary, kernel, iterations=1)
+
+        img_dilate = cv2.dilate(img_erode, kernel, iterations=1)
+
+        #plt.imshow(img_dilate)
         #plt.show()
 
         config = ('-l kor+eng --oem 3 --psm 11')
-        output = pytesseract.image_to_string(gray, config=config)
+        output = pytesseract.image_to_string(img_erode, config=config)
         print(output)
 
 
