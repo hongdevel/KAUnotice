@@ -71,7 +71,7 @@ def extract_title(notice):
     
     return titles
 
-def get_lunch_menu():
+def get_lunch_menu_img():
     pages = target_html('https://kau.ac.kr/kaulife/foodmenu.php')
 
     now = datetime.datetime.now()
@@ -88,7 +88,7 @@ def get_lunch_menu():
             start_date = datetime.datetime.strptime(date.group(2)+date.group(3), "%y년%m월%d일")
             end_date = datetime.datetime.strptime(date.group(2)+date.group(4), "%y년%m월%d일")
 
-            if start_date < now and now < end_date:
+            if start_date < now < end_date:
                 url = i.select_one("td.tit > a").attrs["href"]
                 url = urljoin(base_url, url)
     
@@ -106,30 +106,41 @@ def get_lunch_menu():
 
         urlretrieve(urljoin(base_url, img_url), path_folder + "foodmenu_img.png")
 
-        img = cv2.imread(path_folder + "foodmenu_img.png")
+        return path_folder + "foodmenu_img.png"
+    else:
+        return None
 
-        img_cut = img[47:276, 38:212]
+def get_menu_text(img_path):
+    img = cv2.imread(img_path)
 
-        img_zoom = cv2.resize(img_cut, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+    weekday = datetime.datetime.now().weekday()
+    weekday = 0
 
-        img_gray = cv2.cvtColor(img_zoom, cv2.COLOR_BGR2GRAY)
+    img_cut = img[46 + (270 * weekday):273 + (270 * weekday), 38:212]
 
-        img_binary = cv2.adaptiveThreshold(img_gray, 127, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 9)
+    img_zoom = cv2.resize(img_cut, None, fx=3, fy=3, interpolation=cv2.INTER_LINEAR)
 
-        kernel = np.ones((3,3), np.uint8)
+    img_gray = cv2.cvtColor(img_zoom, cv2.COLOR_BGR2GRAY)
 
-        img_erode = cv2.erode(img_binary, kernel, iterations=1)
+    img_blur = cv2.GaussianBlur(img_gray, (5, 5), 0)
 
-        img_dilate = cv2.dilate(img_erode, kernel, iterations=1)
+    _, img_binary = cv2.threshold(img_blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-        #plt.imshow(img_dilate)
-        #plt.show()
+    kernel = np.ones((3,3), np.uint8)
 
-        config = ('-l kor+eng --oem 3 --psm 11')
-        output = pytesseract.image_to_string(img_erode, config=config)
-        print(output)
+    img_morph = cv2.morphologyEx(img_binary, cv2.MORPH_OPEN, kernel)
+
+    plt.imshow(img)
+    plt.show()
+
+    config = ('-l kor --oem 3 --psm 6')
+    output = pytesseract.image_to_string(img_morph, config=config)
+    print(output)
 
 
 
 if __name__ == "__main__":
-    get_lunch_menu()
+    img_url = get_lunch_menu_img()
+
+    if img_url:
+        get_menu_text(img_url)
