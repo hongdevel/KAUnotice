@@ -71,7 +71,7 @@ def extract_title(notice):
     
     return titles
 
-def get_lunch_menu_img():
+def menu_url():
     pages = target_html('https://kau.ac.kr/kaulife/foodmenu.php')
 
     now = datetime.datetime.now()
@@ -91,26 +91,43 @@ def get_lunch_menu_img():
             if start_date < now < end_date:
                 url = i.select_one("td.tit > a").attrs["href"]
                 url = urljoin(base_url, url)
+
+    return url
+
+def menu_img(url):
+    base_url = 'https://kau.ac.kr'
+
+    path_folder = "./foodmenu/"
+    if not os.path.isdir(path_folder):
+        os.mkdir("./foodmenu/")
+     
+    headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
+    data = requests.get(url,headers=headers)
+
+    soup = BeautifulSoup(data.text, 'html.parser')
     
-    if url:
-        path_folder = "./foodmenu/"
-        if not os.path.isdir(path_folder):
-            os.mkdir("./foodmenu/")
-        
-        headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
-        data = requests.get(url,headers=headers)
-
-        soup = BeautifulSoup(data.text, 'html.parser')
-
+    try:
         img_url = soup.select_one("#sub_article > div.view > div.view_conts img").attrs["src"]
-
         urlretrieve(urljoin(base_url, img_url), path_folder + "foodmenu_img.png")
-
         return path_folder + "foodmenu_img.png"
-    else:
+    except AttributeError:
         return None
+    
+def menu_table(url):
+    headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
+    data = requests.get(url,headers=headers)
 
-def get_menu_text(img_path):
+    soup = BeautifulSoup(data.text, 'html.parser')
+
+    menu = soup.select("#sub_article > div.view > div.view_conts > table > tbody > tr > td")
+
+    #test = menu[0].text.replace("\n", "").replace("\r", "")
+    #for i in menu:
+    #    print(i.text.replace("\n", "").replace("\r", ""))
+    for i in menu:
+        print(i.text.replace("\n", "").replace("\r", ""))
+
+def menu_text(img_path):
     img = cv2.imread(img_path)
 
     weekday = datetime.datetime.now().weekday()
@@ -140,7 +157,11 @@ def get_menu_text(img_path):
 
 
 if __name__ == "__main__":
-    img_url = get_lunch_menu_img()
+    img_url = menu_url()
 
-    if img_url:
-        get_menu_text(img_url)
+    img_path = menu_img(img_url)
+
+    if img_path:
+        menu_text(img_path)
+    else:
+        menu_table(img_url)
