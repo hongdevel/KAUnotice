@@ -124,8 +124,12 @@ def menu_table(url):
     #test = menu[0].text.replace("\n", "").replace("\r", "")
     #for i in menu:
     #    print(i.text.replace("\n", "").replace("\r", ""))
+    cnt = 1
     for i in menu:
-        print(i.text.replace("\n", "").replace("\r", ""))
+        print(i.text.replace("\n", "").replace("\r", ""), end="")
+        if cnt % 5 == 0:
+            print("")
+        cnt += 1
 
 def menu_text(img_path):
     img = cv2.imread(img_path)
