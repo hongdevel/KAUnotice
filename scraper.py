@@ -100,7 +100,7 @@ def get_menu_img(url):
     path_folder = "./foodmenu/"
     if not os.path.isdir(path_folder):
         os.mkdir("./foodmenu/")
-     
+    
     headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
     data = requests.get(url,headers=headers)
 
@@ -138,9 +138,7 @@ def menu_text(img_path):
     weekday = datetime.datetime.now().weekday()
     #weekday = 0
 
-    img_cut = img[46 + (270 * weekday):273 + (270 * weekday), 44:214]
-
-    img_zoom = cv2.resize(img_cut, None, fx=3, fy=3, interpolation=cv2.INTER_LINEAR)
+    img_zoom = cv2.resize(img, None, fx=3, fy=3, interpolation=cv2.INTER_LINEAR)
 
     img_gray = cv2.cvtColor(img_zoom, cv2.COLOR_BGR2GRAY)
 
@@ -152,7 +150,7 @@ def menu_text(img_path):
 
     img_morph = cv2.morphologyEx(img_binary, cv2.MORPH_OPEN, kernel)
 
-    plt.imshow(img)
+    plt.imshow(img_morph)
     plt.show()
 
     config = ('-l kor --oem 3 --psm 6')
