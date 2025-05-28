@@ -94,7 +94,7 @@ def menu_url():
 
     return url
 
-def menu_img(url):
+def get_menu_img(url):
     base_url = 'https://kau.ac.kr'
 
     path_folder = "./foodmenu/"
@@ -119,25 +119,26 @@ def menu_table(url):
 
     soup = BeautifulSoup(data.text, 'html.parser')
 
-    menu = soup.select("#sub_article > div.view > div.view_conts > table > tbody > tr > td")
+    menu = soup.select("#sub_article > div.view > div.view_conts > table > tbody > tr > td:nth-child(1)")
 
     #test = menu[0].text.replace("\n", "").replace("\r", "")
     #for i in menu:
     #    print(i.text.replace("\n", "").replace("\r", ""))
-    cnt = 1
+    test = []
     for i in menu:
-        print(i.text.replace("\n", "").replace("\r", ""), end="")
-        if cnt % 5 == 0:
-            print("")
-        cnt += 1
+        text = i.text.replace("\n", "").replace("\r", "")
+        if text == '\u3000':
+            break
+        test.append(text)
+    print("\n".join(test))
 
 def menu_text(img_path):
     img = cv2.imread(img_path)
 
     weekday = datetime.datetime.now().weekday()
-    weekday = 0
+    #weekday = 0
 
-    img_cut = img[46 + (270 * weekday):273 + (270 * weekday), 38:212]
+    img_cut = img[46 + (270 * weekday):273 + (270 * weekday), 44:214]
 
     img_zoom = cv2.resize(img_cut, None, fx=3, fy=3, interpolation=cv2.INTER_LINEAR)
 
@@ -161,11 +162,14 @@ def menu_text(img_path):
 
 
 if __name__ == "__main__":
-    img_url = menu_url()
+    '''
+    menu_url = menu_url()
 
-    img_path = menu_img(img_url)
+    img_path = get_menu_img(menu_url)
 
     if img_path:
         menu_text(img_path)
     else:
-        menu_table(img_url)
+        menu_table(menu_url)
+    '''
+    menu_text("./foodmenu/foodmenu_img.png")
