@@ -150,12 +150,22 @@ def menu_text(img_path):
 
     img_morph = cv2.morphologyEx(img_binary, cv2.MORPH_OPEN, kernel)
 
-    plt.imshow(img_morph)
-    plt.show()
+    #plt.imshow(img_morph)
+    #plt.show()
 
     config = ('-l kor --oem 3 --psm 6')
-    output = pytesseract.image_to_string(img_morph, config=config)
-    print(output)
+    data = pytesseract.image_to_data(img_morph, config=config, output_type=pytesseract.Output.DICT)
+    
+    for i in range(len(data['text'])):
+        x, y, w, h = data['left'][i], data['top'][i], data['width'][i], data['height'][i]
+        img = cv2.rectangle(img_morph, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        img = cv2.putText(img, data['text'][i], (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 1)
+
+    plt.imshow(img)
+    plt.show()
+    print(data["text"])
+    
+
 
 
 
