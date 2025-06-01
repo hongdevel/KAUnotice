@@ -138,7 +138,10 @@ def menu_text(img_path):
     weekday = datetime.datetime.now().weekday()
     #weekday = 0
 
-    img_zoom = cv2.resize(img, None, fx=3, fy=3, interpolation=cv2.INTER_LINEAR)
+    height, width, _ = img.shape
+    img_cut = img[0:int(height * 0.614), 0:width]
+
+    img_zoom = cv2.resize(img_cut, None, fx=3, fy=3, interpolation=cv2.INTER_LINEAR)
 
     img_gray = cv2.cvtColor(img_zoom, cv2.COLOR_BGR2GRAY)
 
@@ -155,20 +158,20 @@ def menu_text(img_path):
 
     config = ('-l kor --oem 3 --psm 6')
     data = pytesseract.image_to_data(img_morph, config=config, output_type=pytesseract.Output.DICT)
-    
+    #520 250
     for i in range(len(data['text'])):
         x, y, w, h = data['left'][i], data['top'][i], data['width'][i], data['height'][i]
-        img = cv2.rectangle(img_morph, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        img = cv2.putText(img, data['text'][i], (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 1)
+        #img = cv2.rectangle(img_morph, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        #img = cv2.putText(img, data['text'][i], (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 1)
 
-    plt.imshow(img)
+    plt.imshow(img_cut)
     plt.show()
     print(data["text"])
     
 
 
 
-
+#가로 940 세로 2183
 if __name__ == "__main__":
     '''
     menu_url = menu_url()
