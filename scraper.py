@@ -136,12 +136,12 @@ def menu_text(img_path):
     img = cv2.imread(img_path)
 
     weekday = datetime.datetime.now().weekday()
-    #weekday = 0
+    week = ['월', '화', '수', '목', '금']
 
     height, width, _ = img.shape
     img_cut = img[0:int(height * 0.614), 0:width]
 
-    img_zoom = cv2.resize(img_cut, None, fx=3, fy=3, interpolation=cv2.INTER_LINEAR)
+    img_zoom = cv2.resize(img_cut, None, fx=4, fy=4, interpolation=cv2.INTER_LINEAR)
 
     img_gray = cv2.cvtColor(img_zoom, cv2.COLOR_BGR2GRAY)
 
@@ -153,34 +153,55 @@ def menu_text(img_path):
 
     img_morph = cv2.morphologyEx(img_binary, cv2.MORPH_OPEN, kernel)
 
-    #plt.imshow(img_morph)
-    #plt.show()
-
-    config = ('-l kor --oem 3 --psm 6')
+    config = ('-l kor --oem 3 --psm 11')
     data = pytesseract.image_to_data(img_morph, config=config, output_type=pytesseract.Output.DICT)
-    #520 250
-    for i in range(len(data['text'])):
-        x, y, w, h = data['left'][i], data['top'][i], data['width'][i], data['height'][i]
-        #img = cv2.rectangle(img_morph, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        #img = cv2.putText(img, data['text'][i], (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 1)
-
-    plt.imshow(img_cut)
-    plt.show()
-    print(data["text"])
     
+    for i in range(len(data['text'])):
+        if week[weekday] + '요일' in data['text'][i]:
+            y = data['top'][i]
+            h = data['height'][i]
+            break
+
+    _, w = img_morph.shape
+
+    today_menu = img_morph[y+h:y+h+900, 0:w]
+
+    data = pytesseract.image_to_data(today_menu, config=config, output_type=pytesseract.Output.DICT)
+
+    lunch_menus_loc = []
+    
+    for i in range(len(data['text'])):
+        if '한식' in data['text'][i]:
+            lunch_menus_loc.append(data['left'][i])
+        if '일품' in data['text'][i] or '일' in data['text'][i] and '품' in data['text'][i + 1]:
+            lunch_menus_loc.append(data['left'][i])
+        if '면' in data['text'][i]:
+            lunch_menus_loc.append(data['left'][i])
+
+        if len(lunch_menus_loc) >= 3:
+            break
+    
+    h, _ = today_menu.shape
+    lunch_menus = []
+
+    for i in lunch_menus_loc:
+        lunch = today_menu[0:h, i-250:i+470]
+
+        lunch_menus.append(pytesseract.image_to_string(lunch, config=config))
+    
+    return lunch_menus
 
 
 
 #가로 940 세로 2183
 if __name__ == "__main__":
-    '''
-    menu_url = menu_url()
+    url = menu_url()
 
-    img_path = get_menu_img(menu_url)
+    img_path = get_menu_img(url)
 
     if img_path:
         menu_text(img_path)
     else:
-        menu_table(menu_url)
-    '''
-    menu_text("./foodmenu/foodmenu_img.png")
+        menu_table(url)
+    
+    #print(menu_text("./foodmenu/foodmenu_img.png"))
