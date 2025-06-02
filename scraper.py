@@ -121,16 +121,29 @@ def menu_table(url):
 
     menu = soup.select("#sub_article > div.view > div.view_conts > table > tbody > tr > td:nth-child(1)")
 
-    #test = menu[0].text.replace("\n", "").replace("\r", "")
-    #for i in menu:
-    #    print(i.text.replace("\n", "").replace("\r", ""))
-    test = []
-    for i in menu:
-        text = i.text.replace("\n", "").replace("\r", "")
-        if text == '\u3000':
+    weekday = datetime.datetime.now().weekday()
+    weekday = 2
+    week = ['월', '화', '수', '목', '금']
+
+    for i in range(len(menu)):
+        if week[weekday] + '요일' in menu[i].text.replace("\n", "").replace("\r", ""):
+            today_index = i
             break
-        test.append(text)
-    print("\n".join(test))
+    
+    lunch_menus = []
+    for i in range(2, 5):
+        lunch_menu = []
+
+        menu = soup.select(f"#sub_article > div.view > div.view_conts > table > tbody > tr > td:nth-child({i})")
+        for j in range(today_index, len(menu)):
+            text = menu[j].text.replace("\n", "").replace("\r", "")
+            if text == '\u3000' or text == '' or text == None:
+                break
+            lunch_menu.append(text)
+        print("\n".join(lunch_menu))
+        lunch_menus.append("\n".join(lunch_menu))
+
+    return lunch_menus
 
 def menu_text(img_path):
     img = cv2.imread(img_path)
