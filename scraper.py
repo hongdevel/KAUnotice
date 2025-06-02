@@ -157,7 +157,7 @@ def menu_text(img_path):
     data = pytesseract.image_to_data(img_morph, config=config, output_type=pytesseract.Output.DICT)
     
     for i in range(len(data['text'])):
-        if week[weekday] + '요일' in data['text'][i]:
+        if week[weekday] + '요일' in data['text'][i] or week[weekday] in data['text'][i] and '요일' in data['text'][i + 1]:
             y = data['top'][i]
             h = data['height'][i]
             break
@@ -169,13 +169,13 @@ def menu_text(img_path):
     data = pytesseract.image_to_data(today_menu, config=config, output_type=pytesseract.Output.DICT)
 
     lunch_menus_loc = []
-    
+
     for i in range(len(data['text'])):
-        if '한식' in data['text'][i]:
+        if '한식' in data['text'][i] or '한' in data['text'][i] and '식' in data['text'][i + 1]:
             lunch_menus_loc.append(data['left'][i])
         if '일품' in data['text'][i] or '일' in data['text'][i] and '품' in data['text'][i + 1]:
             lunch_menus_loc.append(data['left'][i])
-        if '면' in data['text'][i]:
+        if '면' in data['text'][i] or '먼' in data['text'][i]:
             lunch_menus_loc.append(data['left'][i])
 
         if len(lunch_menus_loc) >= 3:
